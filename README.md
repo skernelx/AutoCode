@@ -33,13 +33,24 @@
 - ⌨️ 记住验证码，切回 Mac 手动输入
 - 😫 验证码太长记不住，来回切换多次
 
-**AutoCode 让这一切自动化！**
+**macOS 自带的验证码填充功能有局限：**
+- ⚠️ 只能在 Safari 等苹果自带应用中使用
+- ⚠️ Chrome、Firefox、第三方应用无法使用
+- ⚠️ 很多场景下需要手动输入
+
+**AutoCode 突破这些限制！**
 
 当你的 iPhone 收到验证码短信或邮件时，AutoCode 会：
 1. ✅ 自动在 Mac 上检测到（通过 iCloud 同步的 iMessage 和邮件）
 2. ✅ 智能提取验证码
-3. ✅ 自动输入到当前输入框，或复制到剪贴板
+3. ✅ **在任何应用中自动输入**：Chrome、Firefox、Electron 应用、终端、任何有输入框的地方
 4. ✅ 无需掏出手机，无需手动输入
+
+**适用场景：**
+- 🌐 任何浏览器：Chrome、Firefox、Edge、Brave...
+- 💻 桌面应用：Slack、Discord、VS Code、终端...
+- 🎮 游戏客户端、虚拟机、远程桌面...
+- 📝 只要有输入框，就能自动填充！
 
 ### ✨ 核心特性
 
@@ -259,13 +270,24 @@ Have you ever experienced this scenario:
 - ⌨️ Memorize the code, switch back to Mac and type it manually
 - 😫 Code too long to remember, switch back and forth multiple times
 
-**AutoCode automates all of this!**
+**macOS built-in AutoFill has limitations:**
+- ⚠️ Only works in Safari and other Apple native apps
+- ⚠️ Chrome, Firefox, and third-party apps are not supported
+- ⚠️ Many scenarios require manual input
+
+**AutoCode breaks through these limitations!**
 
 When your iPhone receives a verification code via SMS or email, AutoCode will:
 1. ✅ Automatically detect it on your Mac (via iCloud-synced iMessage and Mail)
 2. ✅ Intelligently extract the verification code
-3. ✅ Auto-type it into the current input field, or copy to clipboard
+3. ✅ **Auto-type in ANY application**: Chrome, Firefox, Electron apps, Terminal, anywhere with an input field
 4. ✅ No need to pull out your phone, no manual typing required
+
+**Use Cases:**
+- 🌐 Any browser: Chrome, Firefox, Edge, Brave...
+- 💻 Desktop apps: Slack, Discord, VS Code, Terminal...
+- 🎮 Game clients, virtual machines, remote desktop...
+- 📝 Anywhere with an input field, auto-fill works!
 
 ### ✨ Core Features
 
