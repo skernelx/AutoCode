@@ -1,13 +1,14 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "AutoCode",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "identifier": "com.autocode.app",
   "build": {
     "frontendDist": "../src"
   },
   "app": {
     "withGlobalTauri": true,
+    "macOSPrivateApi": true,
     "windows": [
       {
         "label": "main",

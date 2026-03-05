@@ -5,6 +5,11 @@ All notable changes to AutoCode will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-03-05
+
+### 🎨 Changed
+- **隐藏 Dock 图标**：应用不再在 Dock 中显示，只在菜单栏显示，更符合托盘应用的使用习惯
+
 ## [0.3.0] - 2026-03-05
 
 ### ✨ Added

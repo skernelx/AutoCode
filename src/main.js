@@ -57,6 +57,11 @@ function initApp() {
   });
   document.getElementById('btn-recheck').addEventListener('click', checkPermissions);
 
+  // 检查更新按钮
+  document.getElementById('btn-check-update').addEventListener('click', function () {
+    checkForUpdates(true);
+  });
+
   // 添加项目按钮
   document.getElementById('add-keyword').addEventListener('click', function () {
     showInlineInput('keyword-list', function (val) {
@@ -446,12 +451,12 @@ function setupDelaySlider() {
 }
 
 // ===================== 自动更新 =====================
-async function checkForUpdates() {
+async function checkForUpdates(manual = false) {
   if (!window.__TAURI__) return;
 
   try {
     const { check } = window.__TAURI__.updater;
-    const { ask } = window.__TAURI__.dialog;
+    const { ask, message } = window.__TAURI__.dialog;
     const { relaunch } = window.__TAURI__.process;
 
     const update = await check();
@@ -471,9 +476,23 @@ async function checkForUpdates() {
         await update.downloadAndInstall();
         await relaunch();
       }
+    } else if (manual) {
+      // 手动检查时，如果没有更新也要提示
+      await message('当前已是最新版本！', {
+        title: 'AutoCode 更新',
+        kind: 'info'
+      });
     }
   } catch (error) {
     console.log('检查更新失败:', error);
+    if (manual) {
+      // 手动检查时显示错误
+      const { message } = window.__TAURI__.dialog;
+      await message('检查更新失败，请稍后重试', {
+        title: 'AutoCode 更新',
+        kind: 'error'
+      });
+    }
   }
 }
 
