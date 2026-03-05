@@ -1,0 +1,53 @@
+# Changelog
+
+All notable changes to AutoCode will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.2.0] - 2026-03-05
+
+### 🎨 Changed
+- **全新图标设计**：更新了应用图标和系统托盘图标
+- **重写 README**：提供更专业、更详细的项目文档
+
+### 🔧 Fixed
+- **错误处理改进**：将所有 `unwrap()` 调用改为安全的错误处理
+- **配置验证**：添加配置文件验证逻辑，防止无效配置导致崩溃
+- **正则表达式优化**：预编译常用正则表达式，提升性能
+- **任务取消机制**：使用 `CancellationToken` 替代 `abort()`，实现优雅的任务取消
+- **前端错误处理**：添加 clipboard API 降级方案，提高兼容性
+
+### 🚀 Improved
+- **性能优化**：正则表达式缓存机制，减少重复编译
+- **代码质量**：移除所有潜在的 panic 点
+- **用户体验**：更好的错误提示和降级处理
+
+### 📦 Dependencies
+- 添加 `tokio-util` 0.7 用于任务取消
+
+## [0.1.1] - 2026-03-04
+
+### 🎉 Added
+- 初始版本发布
+- iMessage 验证码监控
+- Apple Mail 验证码监控
+- Spotlight 邮件源监控（支持 Outlook）
+- 多策略验证码提取
+- 智能粘贴模式
+- 系统托盘集成
+- 配置管理界面
+
+### ✨ Features
+- 模板正则匹配
+- 发件人白名单
+- HTML 结构解析
+- 关键词近邻搜索
+- 自动回车支持
+- 开机自启动
+- 验证码历史记录
+
+---
+
+[0.2.0]: https://github.com/skernelx/AutoCode/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/skernelx/AutoCode/releases/tag/v0.1.1

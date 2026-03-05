@@ -200,7 +200,13 @@ fn toggle_source_from_tray(app: &tauri::AppHandle, source: TraySource) {
     let tray = app.state::<TrayMenuState>();
 
     let (old_cfg, new_cfg, enabled) = {
-        let mut cfg = config_state.write().unwrap();
+        let mut cfg = match config_state.write() {
+            Ok(c) => c,
+            Err(e) => {
+                log::error!("获取配置锁失败: {}", e);
+                return;
+            }
+        };
         let old = cfg.clone();
         let enabled = match source {
             TraySource::Imessage => {
@@ -238,7 +244,13 @@ fn toggle_auto_enter_from_tray(app: &tauri::AppHandle) {
     let config_state = app.state::<SharedConfig>();
     let tray = app.state::<TrayMenuState>();
     let cfg = {
-        let mut cfg = config_state.write().unwrap();
+        let mut cfg = match config_state.write() {
+            Ok(c) => c,
+            Err(e) => {
+                log::error!("获取配置锁失败: {}", e);
+                return;
+            }
+        };
         cfg.auto_enter = !cfg.auto_enter;
         if let Err(e) = cfg.save() {
             log::error!("保存配置失败: {}", e);
@@ -269,7 +281,15 @@ pub fn run() {
 
     // 同步开机自启状态：以 LaunchAgent 是否存在为准
     {
-        let mut cfg = shared_config.write().unwrap();
+        let mut cfg = match shared_config.write() {
+            Ok(c) => c,
+            Err(e) => {
+                log::error!("获取配置锁失败: {}", e);
+                Arc::new(std::sync::RwLock::new(AppConfig::default()))
+                    .write()
+                    .expect("创建默认配置失败")
+            }
+        };
         cfg.launch_at_login = autostart::is_enabled();
     }
 
@@ -326,7 +346,13 @@ async fn start_monitoring(
 
     // 读取配置并启动对应的监控源
     {
-        let cfg = config.read().unwrap();
+        let cfg = match config.read() {
+            Ok(c) => c,
+            Err(e) => {
+                log::error!("读取配置失败: {}", e);
+                return;
+            }
+        };
         start_enabled_sources(&cmd_tx, &cfg);
     }
 
@@ -347,7 +373,13 @@ fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let config = app.state::<SharedConfig>();
-    let cfg = config.read().unwrap();
+    let cfg = match config.read() {
+        Ok(c) => c,
+        Err(e) => {
+            log::error!("读取配置失败: {}", e);
+            return Err("读取配置失败".into());
+        }
+    };
 
     // 创建菜单项
     let listen_imessage = CheckMenuItem::with_id(

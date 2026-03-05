@@ -30,7 +30,13 @@ pub async fn handle_message(
     extractor: &CodeExtractor,
     app_handle: &tauri::AppHandle,
 ) {
-    let cfg = config.read().unwrap().clone();
+    let cfg = match config.read() {
+        Ok(c) => c.clone(),
+        Err(e) => {
+            log::error!("读取配置失败: {}", e);
+            return;
+        }
+    };
 
     // 尝试提取验证码
     let code = extractor.extract(&msg.text, msg.sender.as_deref(), &cfg);

@@ -136,6 +136,31 @@ impl AppConfig {
         Ok(dir)
     }
 
+    /// 验证配置的有效性
+    pub fn validate(&self) -> Result<()> {
+        // 验证延迟时间范围（100ms - 10000ms）
+        if self.autofill_detect_delay_ms < 100 || self.autofill_detect_delay_ms > 10000 {
+            anyhow::bail!(
+                "autofill_detect_delay_ms 必须在 100-10000 之间，当前值: {}",
+                self.autofill_detect_delay_ms
+            );
+        }
+
+        // 验证正则表达式的有效性
+        for (idx, pattern) in self.verification_patterns.iter().enumerate() {
+            regex::Regex::new(pattern).with_context(|| {
+                format!("正则表达式 #{} 无效: {}", idx + 1, pattern)
+            })?;
+        }
+
+        // 验证关键词不为空
+        if self.verification_keywords.is_empty() {
+            anyhow::bail!("verification_keywords 不能为空");
+        }
+
+        Ok(())
+    }
+
     /// 从磁盘加载配置
     pub fn load() -> Result<Self> {
         let path = Self::config_path()?;
@@ -152,11 +177,20 @@ impl AppConfig {
         let config: Self =
             toml::from_str(&content).with_context(|| "解析配置文件失败，使用默认配置")?;
 
+        // 验证配置
+        if let Err(e) = config.validate() {
+            log::warn!("配置验证失败: {}，使用默认配置", e);
+            return Ok(Self::default());
+        }
+
         Ok(config)
     }
 
     /// 保存配置到磁盘
     pub fn save(&self) -> Result<()> {
+        // 保存前先验证
+        self.validate()?;
+
         let path = Self::config_path()?;
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;

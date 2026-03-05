@@ -248,6 +248,14 @@ function showCode(code, source, strategy, confidence) {
 
 function copyLatestCode() {
   if (history.length === 0) return;
+
+  // 检查 clipboard API 是否可用
+  if (!navigator.clipboard || !navigator.clipboard.writeText) {
+    // 降级方案：使用传统方法
+    fallbackCopyToClipboard(history[0].code);
+    return;
+  }
+
   navigator.clipboard.writeText(history[0].code).then(function () {
     var btn = document.getElementById('copy-btn');
     btn.classList.add('copied');
@@ -258,7 +266,33 @@ function copyLatestCode() {
       btn.innerHTML =
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> 复制';
     }, 1500);
+  }).catch(function (err) {
+    console.error('复制失败:', err);
+    fallbackCopyToClipboard(history[0].code);
   });
+}
+
+// 降级复制方案
+function fallbackCopyToClipboard(text) {
+  var textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    var btn = document.getElementById('copy-btn');
+    btn.classList.add('copied');
+    btn.textContent = '已复制';
+    setTimeout(function () {
+      btn.classList.remove('copied');
+      btn.textContent = '复制';
+    }, 1500);
+  } catch (err) {
+    console.error('降级复制也失败:', err);
+  }
+  document.body.removeChild(textArea);
 }
 
 function renderHistory() {
@@ -280,7 +314,15 @@ function renderHistory() {
   // 点击复制
   el.querySelectorAll('.history-item').forEach(function (item) {
     item.addEventListener('click', function () {
-      navigator.clipboard.writeText(item.getAttribute('data-code'));
+      var code = item.getAttribute('data-code');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).catch(function (err) {
+          console.error('复制失败:', err);
+          fallbackCopyToClipboard(code);
+        });
+      } else {
+        fallbackCopyToClipboard(code);
+      }
     });
   });
 }

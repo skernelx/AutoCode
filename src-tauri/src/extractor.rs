@@ -1,7 +1,17 @@
 use log;
 use regex::Regex;
+use std::sync::OnceLock;
 
 use crate::config::AppConfig;
+
+// 预编译的常用正则表达式
+static DIGIT_PATTERN: OnceLock<Regex> = OnceLock::new();
+
+fn get_digit_pattern() -> &'static Regex {
+    DIGIT_PATTERN.get_or_init(|| {
+        Regex::new(r"\b(\d{4,8})\b").expect("数字正则表达式编译失败")
+    })
+}
 
 /// 提取到的验证码
 #[derive(Debug, Clone)]
@@ -95,7 +105,7 @@ impl ExtractionStrategy for SenderWhitelistStrategy {
         }
 
         // 对已知发件人使用更宽松的数字提取
-        let re = Regex::new(r"\b(\d{4,8})\b").ok()?;
+        let re = get_digit_pattern();
         // 找到所有数字候选
         let candidates: Vec<&str> = re.find_iter(text).map(|m| m.as_str()).collect();
 
@@ -158,7 +168,7 @@ impl ExtractionStrategy for KeywordProximityStrategy {
                 let window = &text[byte_start..byte_end];
 
                 // 在窗口内搜索数字码
-                let re = Regex::new(r"\b(\d{4,8})\b").ok()?;
+                let re = get_digit_pattern();
                 let candidates: Vec<regex::Match> = re.find_iter(window).collect();
 
                 if let Some(best) = candidates.iter().min_by_key(|m| {
