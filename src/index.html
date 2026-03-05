@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoCode</title>
+  </head>
+  <body>
+    <!-- 标签导航 -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        主页
+      </button>
+      <button class="tab-btn" data-tab="settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        设置
+      </button>
+    </nav>
+
+    <!-- ====== 主页 ====== -->
+    <div class="page active" id="page-home">
+      <div class="container">
+        <div class="header">
+          <h1>AutoCode</h1>
+          <p class="subtitle">macOS 验证码智能提取</p>
+          <p class="version" id="version"></p>
+        </div>
+
+        <!-- 权限提示（按需显示） -->
+        <section class="perm-banner" id="perm-banner" style="display: none;">
+          <h2 class="perm-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            需要权限
+          </h2>
+          <div class="perm-item" id="perm-fda" style="display: none;">
+            <div class="perm-info">
+              <span class="perm-name">完全磁盘访问</span>
+              <span class="perm-desc">读取 iMessage 和 Apple Mail 所需。请将 AutoCode.app 添加到列表中。</span>
+            </div>
+            <button class="perm-btn" id="btn-open-fda">前往开启</button>
+          </div>
+          <div class="perm-item" id="perm-acc" style="display: none;">
+            <div class="perm-info">
+              <span class="perm-name">辅助功能（无障碍）</span>
+              <span class="perm-desc">自动输入验证码所需。请将 AutoCode.app 添加到列表中。</span>
+            </div>
+            <button class="perm-btn" id="btn-open-acc">前往开启</button>
+          </div>
+          <button class="perm-recheck" id="btn-recheck">重新检测</button>
+        </section>
+
+        <section class="card">
+          <h2 class="card-title">监控状态</h2>
+          <div class="status-grid">
+            <div class="status-chip" id="status-imessage">
+              <span class="status-dot"></span>
+              <span class="status-label">iMessage</span>
+            </div>
+            <div class="status-chip" id="status-applemail">
+              <span class="status-dot"></span>
+              <span class="status-label">Apple Mail</span>
+            </div>
+            <div class="status-chip" id="status-outlook">
+              <span class="status-dot"></span>
+              <span class="status-label">Outlook</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="code-card" id="code-display" style="display: none;">
+          <div class="code-badge">最新验证码</div>
+          <span class="code-value" id="code-value"></span>
+          <div class="code-meta" id="code-source"></div>
+          <button class="copy-btn" id="copy-btn" title="复制">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            复制
+          </button>
+        </section>
+
+        <section class="card">
+          <h2 class="card-title">历史记录</h2>
+          <div id="history-list" class="history-list">
+            <p class="empty-hint">等待验证码…</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ====== 设置页 ====== -->
+    <div class="page" id="page-settings">
+      <div class="container">
+        <div class="header">
+          <h1>设置</h1>
+          <p class="subtitle">配置 AutoCode 行为</p>
+        </div>
+
+        <!-- 监控源 -->
+        <section class="card">
+          <h2 class="card-title">监控源</h2>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-name">iMessage 短信</span>
+              <span class="setting-desc">监听 Messages 数据库中的短信验证码</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="cfg-listen-imessage" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-name">Apple Mail</span>
+              <span class="setting-desc">监听 Apple Mail 的 .emlx 邮件文件</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="cfg-listen-apple-mail" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-name">Outlook</span>
+              <span class="setting-desc">通过 macOS Spotlight 索引获取邮件</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="cfg-listen-outlook" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </section>
+
+        <!-- 粘贴行为 -->
+        <section class="card">
+          <h2 class="card-title">粘贴行为</h2>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-name">粘贴模式</span>
+              <span class="setting-desc">控制验证码提取后的行为</span>
+            </div>
+          </div>
+          <div class="radio-group" id="cfg-paste-mode">
+            <label class="radio-item">
+              <input type="radio" name="paste_mode" value="smart" />
+              <span class="radio-mark"></span>
+              <div>
+                <span class="radio-label">智能模式</span>
+                <span class="radio-desc">避免与系统 AutoFill 冲突</span>
+              </div>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="paste_mode" value="always" />
+              <span class="radio-mark"></span>
+              <div>
+                <span class="radio-label">总是粘贴</span>
+                <span class="radio-desc">无论前台应用都自动粘贴</span>
+              </div>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="paste_mode" value="floating_only" />
+              <span class="radio-mark"></span>
+              <div>
+                <span class="radio-label">仅通知</span>
+                <span class="radio-desc">只显示通知，手动粘贴</span>
+              </div>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="paste_mode" value="clipboard_only" />
+              <span class="radio-mark"></span>
+              <div>
+                <span class="radio-label">仅复制</span>
+                <span class="radio-desc">只复制到剪贴板</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="setting-row" style="margin-top: 8px;">
+            <div class="setting-info">
+              <span class="setting-name">粘贴后自动回车</span>
+              <span class="setting-desc">自动按回车提交验证码</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="cfg-auto-enter" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-name">AutoFill 等待</span>
+              <span class="setting-desc">Smart 模式下等待系统 AutoFill 的时间</span>
+            </div>
+            <div class="range-control">
+              <input type="range" id="cfg-autofill-delay" min="500" max="5000" step="100" />
+              <span class="range-value" id="delay-value">1500ms</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 通用 -->
+        <section class="card">
+          <h2 class="card-title">通用</h2>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-name">开机自启</span>
+              <span class="setting-desc">登录时自动启动 AutoCode</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="cfg-launch-at-login" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </section>
+
+        <!-- 识别规则 -->
+        <section class="card">
+          <h2 class="card-title">识别规则</h2>
+          <div class="list-section">
+            <div class="list-header">
+              <span class="setting-name">验证码关键词</span>
+              <button class="icon-btn" id="add-keyword" title="添加关键词">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+            <div class="tag-list" id="keyword-list"></div>
+          </div>
+
+          <div class="list-section">
+            <div class="list-header">
+              <span class="setting-name">已知发件人（白名单）</span>
+              <button class="icon-btn" id="add-sender" title="添加发件人">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+            <div class="tag-list" id="sender-list"></div>
+          </div>
+
+          <div class="list-section">
+            <div class="list-header">
+              <span class="setting-name">正则匹配模板</span>
+              <button class="icon-btn" id="add-pattern" title="添加正则">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+            <div class="pattern-list" id="pattern-list"></div>
+          </div>
+        </section>
+
+        <!-- AutoFill 应用白名单 -->
+        <section class="card">
+          <h2 class="card-title">AutoFill 冲突应用</h2>
+          <p class="card-desc">Smart 模式下这些应用不会自动粘贴（系统已提供 AutoFill）</p>
+          <div class="list-section">
+            <div class="list-header">
+              <span class="setting-name">Bundle ID</span>
+              <button class="icon-btn" id="add-autofill-app" title="添加 Bundle ID">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+            <div class="tag-list" id="autofill-app-list"></div>
+          </div>
+        </section>
+
+        <!-- 操作按钮 -->
+        <div class="actions">
+          <button class="btn btn-secondary" id="btn-reset">恢复默认</button>
+          <button class="btn btn-primary" id="btn-save">保存设置</button>
+        </div>
+
+        <div class="save-toast" id="save-toast">设置已保存</div>
+      </div>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
