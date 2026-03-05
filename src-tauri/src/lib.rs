@@ -281,16 +281,11 @@ pub fn run() {
 
     // 同步开机自启状态：以 LaunchAgent 是否存在为准
     {
-        let mut cfg = match shared_config.write() {
-            Ok(c) => c,
-            Err(e) => {
-                log::error!("获取配置锁失败: {}", e);
-                Arc::new(std::sync::RwLock::new(AppConfig::default()))
-                    .write()
-                    .expect("创建默认配置失败")
-            }
-        };
-        cfg.launch_at_login = autostart::is_enabled();
+        if let Ok(mut cfg) = shared_config.write() {
+            cfg.launch_at_login = autostart::is_enabled();
+        } else {
+            log::error!("获取配置锁失败，跳过开机自启状态同步");
+        }
     }
 
     let config_for_setup = shared_config.clone();
