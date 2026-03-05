@@ -1,0 +1,11 @@
+{
+  "version": "0.3.0",
+  "notes": "新增自动更新功能和后台运行支持",
+  "pub_date": "2026-03-05T13:00:19Z",
+  "platforms": {
+    "darwin-aarch64": {
+      "signature": "a7eadb3899e3332405957f0e11219a2ce11dff172ec8fb37fc2214ca68c3283b",
+      "url": "https://github.com/skernelx/AutoCode/releases/download/v0.3.0/AutoCode_0.3.0_aarch64.dmg"
+    }
+  }
+}

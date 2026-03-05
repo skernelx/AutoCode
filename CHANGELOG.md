@@ -5,6 +5,17 @@ All notable changes to AutoCode will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-05
+
+### ✨ Added
+- **自动更新功能**：启动时自动检查 GitHub 更新，支持一键下载安装
+- **后台运行支持**：关闭窗口只隐藏程序，不退出，保持后台监控
+- **安装说明优化**：添加 xattr 命令移除隔离属性的方法
+
+### 🔧 Fixed
+- **窗口关闭行为**：点击关闭按钮不再退出程序，只有从托盘菜单选择退出才真正退出
+- **程序持久运行**：修复程序自动退出的问题，现在会一直在后台运行
+
 ## [0.2.1] - 2026-03-05
 
 ### 🎨 Changed
