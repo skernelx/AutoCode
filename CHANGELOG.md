@@ -5,6 +5,16 @@ All notable changes to AutoCode will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-03-05
+
+### 🎨 Changed
+- **图标优化**：使用全新设计的程序图标和托盘图标
+- **README 优化**：
+  - 突出核心价值：Mac 自动接收 iPhone 验证码
+  - 说明相比 macOS 自带功能的优势（支持所有应用）
+  - 添加程序图标展示
+  - 补充详细的适用场景说明（浏览器、桌面应用、游戏客户端等）
+
 ## [0.2.0] - 2026-03-05
 
 ### 🎨 Changed
