@@ -31,7 +31,7 @@ pub struct AppConfig {
     pub listen_imessage: bool,
     /// 是否监听 Apple Mail
     pub listen_apple_mail: bool,
-    /// 是否监听 Outlook（通过 Spotlight）
+    /// 是否监听 Spotlight 邮件源（兼容 Outlook 等客户端）
     pub listen_outlook: bool,
     /// 粘贴行为
     pub paste_mode: PasteMode,
@@ -146,11 +146,11 @@ impl AppConfig {
             return Ok(config);
         }
 
-        let content = fs::read_to_string(&path)
-            .with_context(|| format!("读取配置文件失败: {:?}", path))?;
+        let content =
+            fs::read_to_string(&path).with_context(|| format!("读取配置文件失败: {:?}", path))?;
 
-        let config: Self = toml::from_str(&content)
-            .with_context(|| "解析配置文件失败，使用默认配置")?;
+        let config: Self =
+            toml::from_str(&content).with_context(|| "解析配置文件失败，使用默认配置")?;
 
         Ok(config)
     }

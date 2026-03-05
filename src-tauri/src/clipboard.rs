@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use enigo::{Enigo, Keyboard, Key, Settings, Direction};
+use enigo::{Direction, Enigo, Key, Keyboard, Settings};
 use std::process::Command;
 use std::thread;
 use std::time::Duration;
@@ -29,11 +29,14 @@ pub fn paste_from_clipboard() -> Result<()> {
     // 短暂延时确保剪贴板就绪
     thread::sleep(Duration::from_millis(50));
 
-    enigo.key(Key::Meta, Direction::Press)
+    enigo
+        .key(Key::Meta, Direction::Press)
         .map_err(|e| anyhow::anyhow!("按下 Meta 键失败: {}", e))?;
-    enigo.key(Key::Unicode('v'), Direction::Click)
+    enigo
+        .key(Key::Unicode('v'), Direction::Click)
         .map_err(|e| anyhow::anyhow!("点击 V 键失败: {}", e))?;
-    enigo.key(Key::Meta, Direction::Release)
+    enigo
+        .key(Key::Meta, Direction::Release)
         .map_err(|e| anyhow::anyhow!("释放 Meta 键失败: {}", e))?;
 
     Ok(())
@@ -44,7 +47,8 @@ pub fn type_text(text: &str) -> Result<()> {
     let mut enigo = Enigo::new(&Settings::default())
         .map_err(|e| anyhow::anyhow!("创建 Enigo 实例失败: {}", e))?;
 
-    enigo.text(text)
+    enigo
+        .text(text)
         .map_err(|e| anyhow::anyhow!("输入文本失败: {}", e))?;
 
     Ok(())
@@ -57,7 +61,8 @@ pub fn press_enter() -> Result<()> {
 
     thread::sleep(Duration::from_millis(100));
 
-    enigo.key(Key::Return, Direction::Click)
+    enigo
+        .key(Key::Return, Direction::Click)
         .map_err(|e| anyhow::anyhow!("按下回车键失败: {}", e))?;
 
     Ok(())

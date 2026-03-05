@@ -27,8 +27,7 @@ fn find_mail_dir() -> Result<PathBuf> {
 
 /// 从 .emlx 文件读取邮件内容
 fn read_emlx_content(path: &PathBuf) -> Result<(String, Option<String>)> {
-    let raw = fs::read(path)
-        .with_context(|| format!("读取 .emlx 文件失败: {:?}", path))?;
+    let raw = fs::read(path).with_context(|| format!("读取 .emlx 文件失败: {:?}", path))?;
 
     let content = String::from_utf8_lossy(&raw).to_string();
 
@@ -99,7 +98,8 @@ pub async fn monitor(tx: MessageSender) -> Result<()> {
                 _ => {}
             }
         }
-    }).context("创建文件监控器失败")?;
+    })
+    .context("创建文件监控器失败")?;
 
     watcher
         .watch(&mail_dir, RecursiveMode::Recursive)
@@ -134,11 +134,15 @@ pub async fn monitor(tx: MessageSender) -> Result<()> {
                     sender
                 );
 
-                if tx.send(IncomingMessage {
-                    source: "Apple Mail".into(),
-                    text: body,
-                    sender,
-                }).await.is_err() {
+                if tx
+                    .send(IncomingMessage {
+                        source: "Apple Mail".into(),
+                        text: body,
+                        sender,
+                    })
+                    .await
+                    .is_err()
+                {
                     log::error!("消息通道已关闭");
                     return Ok(());
                 }

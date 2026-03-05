@@ -52,12 +52,15 @@ pub async fn handle_message(
     );
 
     // 通知前端（悬浮窗/通知栏）
-    let _ = app_handle.emit("verification-code", serde_json::json!({
-        "code": code.code,
-        "source": msg.source,
-        "strategy": code.source,
-        "confidence": code.confidence,
-    }));
+    let _ = app_handle.emit(
+        "verification-code",
+        serde_json::json!({
+            "code": code.code,
+            "source": msg.source,
+            "strategy": code.source,
+            "confidence": code.confidence,
+        }),
+    );
 
     // 决策并执行粘贴
     execute_paste(&cfg, &code, &msg.source).await;
@@ -74,7 +77,10 @@ async fn execute_paste(config: &AppConfig, code: &VerificationCode, source: &str
         PasteDecision::DelayedCheck { bundle_id } => {
             // Smart 模式：等待一段时间让系统 AutoFill 先工作
             let delay = Duration::from_millis(config.autofill_detect_delay_ms);
-            log::info!("Smart 模式：等待 {}ms 检测系统 AutoFill...", config.autofill_detect_delay_ms);
+            log::info!(
+                "Smart 模式：等待 {}ms 检测系统 AutoFill...",
+                config.autofill_detect_delay_ms
+            );
             time::sleep(delay).await;
 
             // 延时后仍在原生 AutoFill App 内，优先避免冲突，改为仅复制
@@ -109,7 +115,11 @@ fn make_paste_decision(config: &AppConfig, source: &str) -> PasteDecision {
             if source == "iMessage" {
                 // 检查当前前台 App 是否有原生 AutoFill 支持
                 if let Some(bundle_id) = clipboard::get_frontmost_app_bundle_id() {
-                    if config.native_autofill_apps.iter().any(|id| id == &bundle_id) {
+                    if config
+                        .native_autofill_apps
+                        .iter()
+                        .any(|id| id == &bundle_id)
+                    {
                         log::info!("当前 App {} 支持原生 AutoFill，使用延时检测", bundle_id);
                         return PasteDecision::DelayedCheck {
                             bundle_id: Some(bundle_id),
@@ -168,7 +178,8 @@ async fn do_paste(config: &AppConfig, code: &str) {
         }
 
         Ok(())
-    }).await;
+    })
+    .await;
 
     match result {
         Ok(Ok(())) => {}

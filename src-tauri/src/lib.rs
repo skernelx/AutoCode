@@ -6,7 +6,7 @@ mod monitor;
 mod paste;
 mod permissions;
 
-use config::{AppConfig, SharedConfig, load_shared_config};
+use config::{load_shared_config, AppConfig, SharedConfig};
 use extractor::CodeExtractor;
 use monitor::MonitorCommand;
 use std::sync::Arc;
@@ -50,7 +50,9 @@ fn update_config(
         log::warn!("设置开机自启失败: {}", e);
     }
 
-    new_config.save().map_err(|e| format!("保存配置失败: {}", e))?;
+    new_config
+        .save()
+        .map_err(|e| format!("保存配置失败: {}", e))?;
     {
         let mut config = state.write().map_err(|e| format!("写入配置失败: {}", e))?;
         *config = new_config.clone();
@@ -84,15 +86,13 @@ fn check_permissions() -> permissions::PermissionStatus {
 /// Tauri 命令：打开完全磁盘访问设置
 #[tauri::command]
 fn open_fda_settings() -> Result<(), String> {
-    permissions::open_full_disk_access_settings()
-        .map_err(|e| format!("打开设置失败: {}", e))
+    permissions::open_full_disk_access_settings().map_err(|e| format!("打开设置失败: {}", e))
 }
 
 /// Tauri 命令：打开辅助功能设置
 #[tauri::command]
 fn open_accessibility_settings() -> Result<(), String> {
-    permissions::open_accessibility_settings()
-        .map_err(|e| format!("打开设置失败: {}", e))
+    permissions::open_accessibility_settings().map_err(|e| format!("打开设置失败: {}", e))
 }
 
 /// 显示/创建主窗口
@@ -173,7 +173,11 @@ fn set_checked(item: &tauri::menu::CheckMenuItem<tauri::Wry>, checked: bool, nam
 }
 
 fn sync_tray_menu_state(tray: &TrayMenuState, cfg: &AppConfig) {
-    set_checked(&tray.listen_imessage, cfg.listen_imessage, "listen_imessage");
+    set_checked(
+        &tray.listen_imessage,
+        cfg.listen_imessage,
+        "listen_imessage",
+    );
     set_checked(
         &tray.listen_apple_mail,
         cfg.listen_apple_mail,
@@ -224,7 +228,7 @@ fn toggle_source_from_tray(app: &tauri::AppHandle, source: TraySource) {
     let source_name = match source {
         TraySource::Imessage => "iMessage",
         TraySource::AppleMail => "Apple Mail",
-        TraySource::Outlook => "Outlook",
+        TraySource::Outlook => "Spotlight 邮件",
     };
     log::info!("{} 监听状态: {}", source_name, enabled);
 }
@@ -338,7 +342,7 @@ async fn start_monitoring(
 /// 设置系统托盘
 fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     use tauri::{
-        menu::{Menu, MenuItem, CheckMenuItem, PredefinedMenuItem},
+        menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem},
         tray::TrayIconBuilder,
     };
 
@@ -347,24 +351,46 @@ fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     // 创建菜单项
     let listen_imessage = CheckMenuItem::with_id(
-        app, "listen_imessage", "监听 iMessage", true, cfg.listen_imessage, None::<&str>,
+        app,
+        "listen_imessage",
+        "监听 iMessage",
+        true,
+        cfg.listen_imessage,
+        None::<&str>,
     )?;
     let listen_apple_mail = CheckMenuItem::with_id(
-        app, "listen_apple_mail", "监听 Apple Mail", true, cfg.listen_apple_mail, None::<&str>,
+        app,
+        "listen_apple_mail",
+        "监听 Apple Mail",
+        true,
+        cfg.listen_apple_mail,
+        None::<&str>,
     )?;
     let listen_outlook = CheckMenuItem::with_id(
-        app, "listen_outlook", "监听 Outlook", true, cfg.listen_outlook, None::<&str>,
+        app,
+        "listen_outlook",
+        "监听 Spotlight 邮件",
+        true,
+        cfg.listen_outlook,
+        None::<&str>,
     )?;
     let auto_enter = CheckMenuItem::with_id(
-        app, "auto_enter", "自动回车", true, cfg.auto_enter, None::<&str>,
+        app,
+        "auto_enter",
+        "自动回车",
+        true,
+        cfg.auto_enter,
+        None::<&str>,
     )?;
 
     let separator = PredefinedMenuItem::separator(app)?;
     let settings = MenuItem::with_id(app, "settings", "设置...", true, None::<&str>)?;
     let about = MenuItem::with_id(
-        app, "about",
+        app,
+        "about",
         &format!("关于 AutoCode v{}", env!("CARGO_PKG_VERSION")),
-        true, None::<&str>,
+        true,
+        None::<&str>,
     )?;
     let quit = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
 
@@ -398,34 +424,32 @@ fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .menu(&menu)
         .show_menu_on_left_click(true)
         .tooltip("AutoCode - 验证码自动提取")
-        .on_menu_event(move |app, event| {
-            match event.id().as_ref() {
-                "quit" => {
-                    log::info!("用户退出 AutoCode");
-                    app.exit(0);
-                }
-                "settings" => {
-                    log::info!("打开设置窗口");
-                    show_settings(app);
-                }
-                "about" => {
-                    log::info!("显示主窗口");
-                    show_main_window(app);
-                }
-                "listen_imessage" => {
-                    toggle_source_from_tray(app, TraySource::Imessage);
-                }
-                "listen_apple_mail" => {
-                    toggle_source_from_tray(app, TraySource::AppleMail);
-                }
-                "listen_outlook" => {
-                    toggle_source_from_tray(app, TraySource::Outlook);
-                }
-                "auto_enter" => {
-                    toggle_auto_enter_from_tray(app);
-                }
-                _ => {}
+        .on_menu_event(move |app, event| match event.id().as_ref() {
+            "quit" => {
+                log::info!("用户退出 AutoCode");
+                app.exit(0);
             }
+            "settings" => {
+                log::info!("打开设置窗口");
+                show_settings(app);
+            }
+            "about" => {
+                log::info!("显示主窗口");
+                show_main_window(app);
+            }
+            "listen_imessage" => {
+                toggle_source_from_tray(app, TraySource::Imessage);
+            }
+            "listen_apple_mail" => {
+                toggle_source_from_tray(app, TraySource::AppleMail);
+            }
+            "listen_outlook" => {
+                toggle_source_from_tray(app, TraySource::Outlook);
+            }
+            "auto_enter" => {
+                toggle_auto_enter_from_tray(app);
+            }
+            _ => {}
         })
         .build(app)?;
 

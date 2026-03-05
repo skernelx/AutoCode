@@ -56,8 +56,7 @@ pub fn enable() -> Result<()> {
     let exe_str = exe.to_string_lossy();
 
     let content = generate_plist(&exe_str);
-    fs::write(&path, &content)
-        .with_context(|| format!("写入 LaunchAgent 失败: {:?}", path))?;
+    fs::write(&path, &content).with_context(|| format!("写入 LaunchAgent 失败: {:?}", path))?;
 
     log::info!("已注册开机自启: {:?}", path);
     Ok(())
@@ -67,8 +66,7 @@ pub fn enable() -> Result<()> {
 pub fn disable() -> Result<()> {
     let path = plist_path()?;
     if path.exists() {
-        fs::remove_file(&path)
-            .with_context(|| format!("删除 LaunchAgent 失败: {:?}", path))?;
+        fs::remove_file(&path).with_context(|| format!("删除 LaunchAgent 失败: {:?}", path))?;
         log::info!("已取消开机自启: {:?}", path);
     }
     Ok(())

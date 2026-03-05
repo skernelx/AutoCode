@@ -1,6 +1,6 @@
 [package]
 name = "autocode"
-version = "0.1.0"
+version = "0.1.1"
 description = "AutoCode - Smart 2FA verification code extractor for macOS"
 authors = ["you"]
 edition = "2021"
@@ -29,4 +29,3 @@ dirs = "6"
 enigo = "0.3"
 anyhow = "1"
 thiserror = "2"
-

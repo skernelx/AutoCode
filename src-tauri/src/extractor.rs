@@ -14,7 +14,12 @@ pub struct VerificationCode {
 /// 提取策略 trait
 trait ExtractionStrategy: Send + Sync {
     fn name(&self) -> &str;
-    fn extract(&self, text: &str, sender: Option<&str>, config: &AppConfig) -> Option<VerificationCode>;
+    fn extract(
+        &self,
+        text: &str,
+        sender: Option<&str>,
+        config: &AppConfig,
+    ) -> Option<VerificationCode>;
     fn confidence(&self) -> f32;
 }
 
@@ -26,7 +31,12 @@ impl ExtractionStrategy for TemplateStrategy {
         "模板匹配"
     }
 
-    fn extract(&self, text: &str, _sender: Option<&str>, config: &AppConfig) -> Option<VerificationCode> {
+    fn extract(
+        &self,
+        text: &str,
+        _sender: Option<&str>,
+        config: &AppConfig,
+    ) -> Option<VerificationCode> {
         for pattern_str in &config.verification_patterns {
             match Regex::new(pattern_str) {
                 Ok(re) => {
@@ -66,7 +76,12 @@ impl ExtractionStrategy for SenderWhitelistStrategy {
         "发件人白名单"
     }
 
-    fn extract(&self, text: &str, sender: Option<&str>, config: &AppConfig) -> Option<VerificationCode> {
+    fn extract(
+        &self,
+        text: &str,
+        sender: Option<&str>,
+        config: &AppConfig,
+    ) -> Option<VerificationCode> {
         let sender = sender?;
         let sender_lower = sender.to_lowercase();
 
@@ -82,10 +97,7 @@ impl ExtractionStrategy for SenderWhitelistStrategy {
         // 对已知发件人使用更宽松的数字提取
         let re = Regex::new(r"\b(\d{4,8})\b").ok()?;
         // 找到所有数字候选
-        let candidates: Vec<&str> = re
-            .find_iter(text)
-            .map(|m| m.as_str())
-            .collect();
+        let candidates: Vec<&str> = re.find_iter(text).map(|m| m.as_str()).collect();
 
         if candidates.is_empty() {
             return None;
@@ -119,19 +131,26 @@ impl ExtractionStrategy for KeywordProximityStrategy {
         "关键词近邻"
     }
 
-    fn extract(&self, text: &str, _sender: Option<&str>, config: &AppConfig) -> Option<VerificationCode> {
+    fn extract(
+        &self,
+        text: &str,
+        _sender: Option<&str>,
+        config: &AppConfig,
+    ) -> Option<VerificationCode> {
         let text_lower = text.to_lowercase();
 
         for keyword in &config.verification_keywords {
             let keyword_lower = keyword.to_lowercase();
             if let Some(pos) = text_lower.find(&keyword_lower) {
                 // 在关键词前后 80 字符范围内搜索
-                let byte_start = text.char_indices()
+                let byte_start = text
+                    .char_indices()
                     .rev()
                     .find(|(i, _)| *i <= pos.saturating_sub(80))
                     .map(|(i, _)| i)
                     .unwrap_or(0);
-                let byte_end = text.char_indices()
+                let byte_end = text
+                    .char_indices()
                     .find(|(i, _)| *i >= (pos + keyword.len() + 80).min(text.len()))
                     .map(|(i, _)| i)
                     .unwrap_or(text.len());
@@ -142,14 +161,16 @@ impl ExtractionStrategy for KeywordProximityStrategy {
                 let re = Regex::new(r"\b(\d{4,8})\b").ok()?;
                 let candidates: Vec<regex::Match> = re.find_iter(window).collect();
 
-                if let Some(best) = candidates.iter()
-                    .min_by_key(|m| {
-                        // 距离关键词最近的
-                        let m_center = m.start() + m.len() / 2;
-                        let kw_pos_in_window = if pos >= byte_start { pos - byte_start } else { 0 };
-                        (m_center as i64 - kw_pos_in_window as i64).unsigned_abs()
-                    })
-                {
+                if let Some(best) = candidates.iter().min_by_key(|m| {
+                    // 距离关键词最近的
+                    let m_center = m.start() + m.len() / 2;
+                    let kw_pos_in_window = if pos >= byte_start {
+                        pos - byte_start
+                    } else {
+                        0
+                    };
+                    (m_center as i64 - kw_pos_in_window as i64).unsigned_abs()
+                }) {
                     let code = best.as_str().to_string();
                     log::debug!("关键词 '{}' 近邻提取到验证码: {}", keyword, code);
                     return Some(VerificationCode {
@@ -176,7 +197,12 @@ impl ExtractionStrategy for HtmlStructureStrategy {
         "HTML结构"
     }
 
-    fn extract(&self, text: &str, _sender: Option<&str>, _config: &AppConfig) -> Option<VerificationCode> {
+    fn extract(
+        &self,
+        text: &str,
+        _sender: Option<&str>,
+        _config: &AppConfig,
+    ) -> Option<VerificationCode> {
         // 检测是否是 HTML 内容
         if !text.contains('<') || !text.contains('>') {
             return None;

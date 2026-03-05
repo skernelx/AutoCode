@@ -1,13 +1,13 @@
 use tokio::sync::mpsc;
 
-pub mod imessage;
 pub mod apple_mail;
+pub mod imessage;
 pub mod outlook;
 
 /// 收到的新消息/邮件
 #[derive(Debug, Clone)]
 pub struct IncomingMessage {
-    /// 消息来源（"iMessage", "Apple Mail", "Outlook"）
+    /// 消息来源（例如 "iMessage", "Apple Mail", "Outlook", "Spotlight (...)"）
     pub source: String,
     /// 消息文本内容
     pub text: String,
@@ -97,27 +97,33 @@ impl MonitorActor {
                 }
                 MonitorCommand::StartOutlook => {
                     if self.outlook_handle.is_none() {
-                        log::info!("启动 Outlook 监控（Spotlight）");
+                        log::info!("启动 Spotlight 邮件监控（兼容 Outlook）");
                         let tx = self.msg_tx.clone();
                         self.outlook_handle = Some(tokio::spawn(async move {
                             if let Err(e) = outlook::monitor(tx).await {
-                                log::error!("Outlook 监控出错: {}", e);
+                                log::error!("Spotlight 邮件监控出错: {}", e);
                             }
                         }));
                     }
                 }
                 MonitorCommand::StopOutlook => {
                     if let Some(handle) = self.outlook_handle.take() {
-                        log::info!("停止 Outlook 监控");
+                        log::info!("停止 Spotlight 邮件监控");
                         handle.abort();
                     }
                 }
                 MonitorCommand::Shutdown => {
                     log::info!("MonitorActor 收到关闭命令");
                     // 停止所有监控
-                    if let Some(h) = self.imessage_handle.take() { h.abort(); }
-                    if let Some(h) = self.apple_mail_handle.take() { h.abort(); }
-                    if let Some(h) = self.outlook_handle.take() { h.abort(); }
+                    if let Some(h) = self.imessage_handle.take() {
+                        h.abort();
+                    }
+                    if let Some(h) = self.apple_mail_handle.take() {
+                        h.abort();
+                    }
+                    if let Some(h) = self.outlook_handle.take() {
+                        h.abort();
+                    }
                     break;
                 }
             }

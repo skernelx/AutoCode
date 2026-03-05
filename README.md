@@ -26,14 +26,14 @@
 
 ## 项目简介 | Overview
 
-AutoCode 是一个面向 macOS 的验证码助手，自动监听 iMessage、Apple Mail、Outlook 中的新消息并提取验证码，然后按你的策略自动输入或复制到剪贴板。  
-AutoCode is a macOS desktop app that monitors incoming messages/emails, extracts verification codes, then auto-types or copies them based on your settings.
+AutoCode 是一个面向 macOS 的验证码助手，自动监听 iMessage、Apple Mail、Spotlight 邮件源（含 Outlook）中的新消息并提取验证码，然后按你的策略自动输入或复制到剪贴板。  
+AutoCode is a macOS desktop app that monitors incoming messages/emails from iMessage, Apple Mail, and Spotlight-based mail sources (including Outlook), then auto-types or copies verification codes based on your settings.
 
 ## 核心功能 | Features
 
 | 中文 | English |
 | --- | --- |
-| 多来源监听：iMessage / Apple Mail / Outlook(Spotlight) | Multi-source monitoring: iMessage / Apple Mail / Outlook via Spotlight |
+| 多来源监听：iMessage / Apple Mail / Spotlight 邮件（含 Outlook） | Multi-source monitoring: iMessage / Apple Mail / Spotlight mail sources (including Outlook) |
 | 多策略提取：模板正则、发件人白名单、HTML 结构、关键词近邻 | Multi-strategy extraction: regex templates, sender whitelist, HTML structure, keyword proximity |
 | 粘贴模式：`smart` / `always` / `floating_only` / `clipboard_only` | Paste modes: `smart` / `always` / `floating_only` / `clipboard_only` |
 | 前端设置修改后，托盘勾选状态即时同步 | Tray check states sync immediately after settings are changed in UI |
@@ -91,7 +91,7 @@ Without these permissions, the app still runs but some features are degraded.
 | --- | --- | --- | --- |
 | `listen_imessage` | `true` | 是否监听 iMessage | Enable iMessage monitor |
 | `listen_apple_mail` | `true` | 是否监听 Apple Mail | Enable Apple Mail monitor |
-| `listen_outlook` | `true` | 是否监听 Outlook | Enable Outlook monitor |
+| `listen_outlook` | `true` | 是否监听 Spotlight 邮件源（含 Outlook） | Enable Spotlight mail monitor (including Outlook) |
 | `paste_mode` | `smart` | 粘贴策略模式 | Paste behavior mode |
 | `auto_enter` | `false` | 自动输入后回车 | Press Enter after auto-typing |
 | `launch_at_login` | `false` | 开机自启 | Launch at login |
@@ -120,7 +120,7 @@ AutoCode/
 ├─ src/                    # Frontend (Vanilla HTML/CSS/JS)
 ├─ src-tauri/
 │  ├─ src/
-│  │  ├─ monitor/          # iMessage / Apple Mail / Outlook monitors
+│  │  ├─ monitor/          # iMessage / Apple Mail / Spotlight mail monitors
 │  │  ├─ extractor.rs      # Multi-strategy code extraction
 │  │  ├─ paste.rs          # Auto-typing and conflict handling
 │  │  ├─ permissions.rs    # Permission checks and settings shortcuts
@@ -144,10 +144,10 @@ AutoCode/
 - 检查 `辅助功能` 权限
 - 如果在 `smart` 模式，可能因为 AutoFill 冲突规避而回退为“仅复制”
 
-### Outlook 识别不稳定
+### Spotlight 邮件识别不稳定
 
 - 依赖 Spotlight 索引
-- 先确认 `mdfind` 能在 Outlook 数据目录检索到目标邮件
+- 先确认 `mdfind` 能在目标客户端数据目录检索到邮件
 
 ## 致谢 | Acknowledgement
 

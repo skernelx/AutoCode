@@ -17,7 +17,10 @@ fn db_path() -> Result<PathBuf> {
 }
 
 /// 查询最新消息
-fn query_new_messages(conn: &Connection, since_rowid: i64) -> Result<Vec<(i64, String, Option<String>)>> {
+fn query_new_messages(
+    conn: &Connection,
+    since_rowid: i64,
+) -> Result<Vec<(i64, String, Option<String>)>> {
     let mut stmt = conn.prepare(
         "SELECT m.ROWID, m.text, h.id as sender
          FROM message m
@@ -26,7 +29,7 @@ fn query_new_messages(conn: &Connection, since_rowid: i64) -> Result<Vec<(i64, S
            AND m.text IS NOT NULL
            AND m.text != ''
          ORDER BY m.ROWID ASC
-         LIMIT 20"
+         LIMIT 20",
     )?;
 
     let rows = stmt.query_map([since_rowid], |row| {
@@ -50,11 +53,9 @@ fn query_new_messages(conn: &Connection, since_rowid: i64) -> Result<Vec<(i64, S
 
 /// 获取当前最大 ROWID（首次启动时用）
 fn get_max_rowid(conn: &Connection) -> Result<i64> {
-    let rowid: i64 = conn.query_row(
-        "SELECT COALESCE(MAX(ROWID), 0) FROM message",
-        [],
-        |row| row.get(0),
-    )?;
+    let rowid: i64 = conn.query_row("SELECT COALESCE(MAX(ROWID), 0) FROM message", [], |row| {
+        row.get(0)
+    })?;
     Ok(rowid)
 }
 
@@ -63,7 +64,10 @@ pub async fn monitor(tx: MessageSender) -> Result<()> {
     let path = db_path()?;
 
     if !path.exists() {
-        anyhow::bail!("iMessage 数据库不存在: {:?}（需要「完全磁盘访问」权限）", path);
+        anyhow::bail!(
+            "iMessage 数据库不存在: {:?}（需要「完全磁盘访问」权限）",
+            path
+        );
     }
 
     log::info!("iMessage 监控启动，数据库路径: {:?}", path);
@@ -72,7 +76,8 @@ pub async fn monitor(tx: MessageSender) -> Result<()> {
     let conn = Connection::open_with_flags(
         &path,
         rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
-    ).context("无法打开 iMessage 数据库（需要「完全磁盘访问」权限）")?;
+    )
+    .context("无法打开 iMessage 数据库（需要「完全磁盘访问」权限）")?;
 
     // 初始化：获取当前最大 ROWID，只处理之后的新消息
     let current_max = get_max_rowid(&conn)?;
@@ -90,13 +95,21 @@ pub async fn monitor(tx: MessageSender) -> Result<()> {
         match query_new_messages(&conn, last) {
             Ok(messages) => {
                 for (rowid, text, sender) in messages {
-                    log::debug!("iMessage 新消息 [ROWID={}]: {}", rowid, &text[..text.len().min(50)]);
+                    log::debug!(
+                        "iMessage 新消息 [ROWID={}]: {}",
+                        rowid,
+                        &text[..text.len().min(50)]
+                    );
 
-                    if tx.send(IncomingMessage {
-                        source: "iMessage".into(),
-                        text,
-                        sender,
-                    }).await.is_err() {
+                    if tx
+                        .send(IncomingMessage {
+                            source: "iMessage".into(),
+                            text,
+                            sender,
+                        })
+                        .await
+                        .is_err()
+                    {
                         log::error!("消息通道已关闭");
                         return Ok(());
                     }
