@@ -38,6 +38,9 @@ function initApp() {
 
     // 启动时检查权限
     checkPermissions();
+
+    // 启动时检查更新
+    checkForUpdates();
   }
 
   // 按钮事件
@@ -440,6 +443,38 @@ function setupDelaySlider() {
   slider.addEventListener('input', function () {
     label.textContent = slider.value + 'ms';
   });
+}
+
+// ===================== 自动更新 =====================
+async function checkForUpdates() {
+  if (!window.__TAURI__) return;
+
+  try {
+    const { check } = window.__TAURI__.updater;
+    const { ask } = window.__TAURI__.dialog;
+    const { relaunch } = window.__TAURI__.process;
+
+    const update = await check();
+
+    if (update?.available) {
+      const yes = await ask(
+        `发现新版本 ${update.version}！\n\n当前版本：${update.currentVersion}\n\n是否立即下载并安装？`,
+        {
+          title: 'AutoCode 更新',
+          kind: 'info',
+          okLabel: '立即更新',
+          cancelLabel: '稍后提醒'
+        }
+      );
+
+      if (yes) {
+        await update.downloadAndInstall();
+        await relaunch();
+      }
+    }
+  } catch (error) {
+    console.log('检查更新失败:', error);
+  }
 }
 
 // ===================== 工具函数 =====================

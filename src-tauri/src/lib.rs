@@ -292,6 +292,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(shared_config.clone())
         .invoke_handler(tauri::generate_handler![
             get_config,
@@ -325,6 +326,13 @@ pub fn run() {
             setup_tray(app)?;
 
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            // 拦截窗口关闭事件，隐藏窗口而不是退出程序
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                window.hide().unwrap();
+                api.prevent_close();
+            }
         })
         .run(tauri::generate_context!())
         .expect("AutoCode 启动失败");

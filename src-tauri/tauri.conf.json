@@ -42,5 +42,15 @@
       "minimumSystemVersion": "12.0",
       "signingIdentity": "-"
     }
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/skernelx/AutoCode/releases/latest/download/latest.json"
+      ],
+      "dialog": true,
+      "pubkey": ""
+    }
   }
 }
